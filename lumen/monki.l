@@ -31,5 +31,13 @@
       (= n 95)))               ; _
 |)
 
+; We prefer using rlwrap when possible.
+;   old:  exec ${host} "${home}/${code}" "$@"
+;   new:  exec $(which rlwrap) ${host} "${home}/${code}" "$@"
+(patch "bin/lumen"
+       "\nexec "
+       "\nexec $(which rlwrap) ")
+($ "chmod" "+x" "bin/lumen")
+
 (rebuild)
 
