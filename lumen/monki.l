@@ -32,8 +32,6 @@
 |)
 
 ; We prefer using rlwrap when possible.
-;   old:  exec ${host} "${home}/${code}" "$@"
-;   new:  exec $(which rlwrap) ${host} "${home}/${code}" "$@"
 (patch "bin/lumen"
        "\nexec "
        "\nexec $(which rlwrap) ")
