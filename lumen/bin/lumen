@@ -21,13 +21,14 @@ else
     echo no host found
 fi
 
+os=$(uname | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
 case $host in
     node*)
         code=lumen.js
-        export NODE_PATH="$NODE_PATH:${home}:${dir}/lib";;
+        export NODE_PATH="$NODE_PATH:${home}:${dir}/lib:${dir}/lib/${os}";;
     *)
         code=lumen.lua
-        export LUA_PATH="$LUA_PATH;${home}/?.lua;${dir}/lib/?.lua;;";;
+        export LUA_PATH="$LUA_PATH;${home}/?.lua;${dir}/lib/?.lua;${dir}/lib/${os}/?.lua;;";;
 esac
 
 export LUMEN_HOST="${host}"

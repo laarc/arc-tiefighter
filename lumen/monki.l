@@ -50,6 +50,28 @@ export LUMEN_HOST="${host}"
 exec $(which rlwrap) ${host} "${home}/${code}" "$@"
 """)
 
+;
+; bin/lumen: Add lib/${os} to the LUA_PATH and NODE_PATH.
+;
+(patch "bin/lumen"
+"""
+case $host in
+"""
+"""
+os=$(uname | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
+case $host in
+""")
+
+(patch "bin/lumen"
+|export NODE_PATH="$NODE_PATH:${home}:${dir}/lib";;|
+|export NODE_PATH="$NODE_PATH:${home}:${dir}/lib:${dir}/lib/${os}";;|)
+
+(patch "bin/lumen"
+|export LUA_PATH="$LUA_PATH;${home}/?.lua;${dir}/lib/?.lua;;";;|
+|export LUA_PATH="$LUA_PATH;${home}/?.lua;${dir}/lib/?.lua;${dir}/lib/${os}/?.lua;;";;|)
+
+
+; Build and test Lumen.
 (rebuild 3)
 (test)
 
