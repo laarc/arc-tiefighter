@@ -1,0 +1,74 @@
+#!/bin/sh
+
+# resolve symlinks.
+if [ -z "$at" ]; then at="`readlink -f "$0" 2>/dev/null`"; fi
+if [ -z "$at" ]; then at="`readlink    "$0" 2>/dev/null`"; fi
+if [ -z "$at" ]; then at="$0"; fi
+
+dir="$(pwd)"
+cd "$(dirname "$at")"
+cd ..
+home="$(pwd)"
+bin="${home}/bin"
+cd "${dir}"
+
+# LuaJIT is required.
+host=luajit
+export LUMEN_HOST=luajit
+ext=lua
+
+os=$(uname | sed "y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/")
+case $host in
+    node*)
+        code=lumen.js
+        export NODE_PATH="$NODE_PATH:${bin}:${dir}/lib:${dir}/lib/${os}";;
+    *)
+        code=lumen.lua
+        export LUA_PATH="$LUA_PATH;${bin}/?.lua;${dir}/lib/?.lua;${dir}/lib/${os}/?.lua;;";;
+esac
+
+if [ ! -z "${REBUILD}" ]; then
+  #
+  # Rebuild arc-tiefighter.
+  #
+  obj="${home}/obj"
+  lumen_bin="${home}/lumen/bin"
+  lumen="${home}/lumen/bin/lumen"
+  if [ ! -e "${lumen}" ]; then 1>&2 echo "Lumen not found" && exit 1; fi
+
+  for target in "lua"; do
+      cd "${bin}"
+      git checkout *.${target}
+      cd "${dir}"
+      cp "${lumen_bin}/"*.${target} "${bin}/"
+  done
+
+  rm -f "${obj}/"*.js "${obj}/"*.lua
+
+  for target in "lua"; do
+      "${lumen}" -c "${home}/sudoarc/sudoarc.l" -o "${obj}/sudoarc.${target}" -t ${target}
+  done
+
+  for target in "lua"; do
+    "${lumen}" "${obj}/sudoarc.${ext}" -c "${home}/main.l" -o "${obj}/main.${target}" -t ${target}
+    cat "${lumen_bin}/lumen.${target}" | grep -v '^main\(\)' > "${bin}/website.${target}"
+    for src in "sudoarc" "main"; do
+        cat "${obj}/${src}.${target}" >> "${bin}/website.${target}"
+    done
+    echo "main()" >> "${bin}/website.${target}"
+  done
+fi
+
+if [ "${REPL}" == "0" ]; then
+  args="-e (run)"
+else
+  args=""
+  rlwrap="`which rlwrap`"
+fi
+
+if [ ! -z "$rlwrap" ]; then
+  cmdline="$@" exec "${rlwrap}" "${host}" "${bin}/website.${ext}" $args
+else
+  cmdline="$@" exec             "${host}" "${bin}/website.${ext}" $args
+fi
+
