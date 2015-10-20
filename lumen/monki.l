@@ -1,4 +1,4 @@
-(clone "sctb/lumen")
+(clone "laarc/lumen" "0008-reader-fix")
 
 (def lumenfiles ()
   (tree "." "/*.l$"))
@@ -9,12 +9,15 @@
 
 (def rebuild (n)
   (prn ($ "make" "clean"))
-  (repeat (or n 2)
+  (repeat (or n 3)
     (build))
   (prn ($ "make" "test")))
 
-; We prefer having foo.bar syntax in Lumen, even though it suffers
-; from inconsistent behavior.  E.g. foo.bar-baz doesn't work.
+(def chmodx (path)
+  ($ "chmod" "+x" path))
+
+; compiler.l: Re-enable foo.bar syntax, even though it suffers from
+; inconsistent behavior.  (E.g. foo.bar-baz doesn't work.)
 (patch "compiler.l"
 |
 (define valid-code? (n)
@@ -31,11 +34,35 @@
       (= n 95)))               ; _
 |)
 
-; We prefer using rlwrap when possible.
+; bin/lumen: Fix LUMEN_HOST to handle spaces.
 (patch "bin/lumen"
-       "\nexec "
-       "\nexec $(which rlwrap) ")
-($ "chmod" "+x" "bin/lumen")
+|
+if [ ! -z ${LUMEN_HOST} ]
+then
+    host=${LUMEN_HOST}
+||
+if [ ! -z "${LUMEN_HOST}" ]
+then
+    host="${LUMEN_HOST}"
+|)
+
+; bin/lumen: Use rlwrap when possible.
+(patch "bin/lumen"
+|exec ${host} "${home}/${code}" "$@"|
+|exec $(which rlwrap) ${host} "${home}/${code}" "$@"
+|)
+
+
+; bin/lumen: Export LUMEN_HOST so that users can discern LuaJIT vs Lua.
+(patch "bin/lumen"
+|
+exec $(which rlwrap) ${host} "${home}/${code}" "$@"
+||
+export LUMEN_HOST="${host}"
+exec $(which rlwrap) ${host} "${home}/${code}" "$@"
+|)
+
+(chmodx "bin/lumen")
 
 (rebuild)
 
