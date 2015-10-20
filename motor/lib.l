@@ -1,7 +1,8 @@
 ;; -*- mode: lisp -*-
 
 (define-macro define-c (v x)
-  (cat "|" v ".cdef[[" (inner x) "]]|"))
+  `(let x ,(cat "|" v ".cdef[[" (inner x) "]]|")
+     x))
 
 (define-macro resume args
   `(coroutine.resume ,@args))

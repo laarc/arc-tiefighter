@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-LUMEN := LUMEN_HOST=luajit lumen
+LUMEN := LUMEN_HOST=luajit ../lumen/bin/lumen
 MODS :=	bin/motor.lua		\
 	bin/linux/system.lua	\
 	bin/darwin/system.lua	\
