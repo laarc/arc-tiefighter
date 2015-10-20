@@ -4,6 +4,7 @@ LUMEN := LUMEN_HOST=luajit ../lumen/bin/lumen
 MODS :=	bin/motor.lua		\
 	bin/linux/platform.lua	\
 	bin/darwin/platform.lua	\
+	bin/freebsd/platform.lua	\
 	bin/buffer.lua		\
 	bin/stream.lua		\
 	bin/http.lua		\
@@ -28,6 +29,10 @@ bin/linux/%.lua : lib/linux/%.l obj/lib.lua
 	@$(LUMEN) obj/lib.lua -c $< -o $@ -t lua
 
 bin/darwin/%.lua : lib/darwin/%.l obj/lib.lua
+	@echo $@
+	@$(LUMEN) obj/lib.lua -c $< -o $@ -t lua
+
+bin/freebsd/%.lua : lib/freebsd/%.l obj/lib.lua
 	@echo $@
 	@$(LUMEN) obj/lib.lua -c $< -o $@ -t lua
 
