@@ -1,4 +1,4 @@
-(clone "laarc/lumen" "0008-reader-fix")
+(clone "sctb/lumen")
 
 ; compiler.l: Re-enable foo.bar syntax, even though it suffers from
 ; inconsistent behavior.  (E.g. foo.bar-baz doesn't work.)
