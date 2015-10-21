@@ -3,33 +3,33 @@
 ; compiler.l: Re-enable foo.bar syntax, even though it suffers from
 ; inconsistent behavior.  (E.g. foo.bar-baz doesn't work.)
 (patch "compiler.l"
-"""
+|
 (define valid-code? (n)
   (or (number-code? n)         ; 0-9
       (and (> n 64) (< n 91))  ; A-Z
       (and (> n 96) (< n 123)) ; a-z
       (= n 95)))               ; _
-"""
-"""
+|
+|
 (define valid-code? (n)
   (or (number-code? n)         ; 0-9
       (and (> n 64) (< n 91))  ; A-Z
       (and (> n 96) (< n 123)) ; a-z
       (= n 46)                 ; .
       (= n 95)))               ; _
-""")
+|)
 
 ; runtime.l: def obj? (x)
 (patch "runtime.l"
-"""
+|
 (define-global atom? (x)
-"""
-"""
+|
+|
 (define-global obj? (x)
   (and (is? x) (= (type x) (target js: 'object lua: 'table))))
 
 (define-global atom? (x)
-""")
+|)
 
 ; runtime.l: string:
 ;  - detect circular lists
@@ -91,34 +91,42 @@
 
 ; bin/lumen: Fix LUMEN_HOST to handle spaces.
 (patch "bin/lumen"
-"""
+|
 if [ ! -z ${LUMEN_HOST} ]
 then
     host=${LUMEN_HOST}
-"""
-"""
+|
+|
 if [ ! -z "${LUMEN_HOST}" ]
 then
     host="${LUMEN_HOST}"
-""")
+|)
 
 ; bin/lumen: Use rlwrap when possible.
 (patch "bin/lumen"
-(rtrim
-"""exec ${host} "${home}/${code}" "$@" """)
-"""exec $(which rlwrap) ${host} "${home}/${code}" "$@"
-""")
+|exec ${host} "${home}/${code}" "$@"|
+; Using rlwrap turns out to make compilation slower.  A full rebuild
+; of Lumen jumped from 0.761s to 0.968s, a ~25% slowdown.  Keep
+; rlwrap disabled except for repls.
+|
+if [ -z "$*" ]; then
+  exec rlwrap ${host} "${home}/${code}" "$@"
+else
+  exec        ${host} "${home}/${code}" "$@"
+fi
+|)
 
 
 ; bin/lumen: Export LUMEN_HOST so that users can discern LuaJIT vs Lua.
 (patch "bin/lumen"
-"""
-exec $(which rlwrap) ${host} "${home}/${code}" "$@"
-"""
-"""
+|esac
+
+|
+|esac
+
 export LUMEN_HOST="${host}"
-exec $(which rlwrap) ${host} "${home}/${code}" "$@"
-""")
+|)
+
 
 ;
 ; bin/lumen: Add lib/${os} to the LUA_PATH and NODE_PATH.
@@ -245,6 +253,30 @@ case $host in
 |(define delimiters (set-of "(" ")" ";" "\n"))|
 |(define delimiters (set-of "(" ")"  "[" "]"  "{" "}" ";" "\n"))|)
 
+
+;
+; main.l: Make rep a global function, and change eval-print to return
+; the value of the expression.
+;
+
+(patch "main.l"
+|
+(define eval-print (form)
+  (let ((ok x) (guard ((get compiler 'eval) form)))
+    (if (not ok) (print (cat "error: " x))
+        (is? x) (print (string x)))))
+
+(define rep (s)
+  (eval-print ((get reader 'read-string) s)))
+||
+(define eval-print (form)
+  (let ((ok x) (guard ((get compiler 'eval) form)))
+    (if (not ok) (print (cat "error: " x))
+        (is? x) (do (print (string x)) x))))
+
+(define-global rep (s)
+  (eval-print ((get reader 'read-string) s)))
+|)
 
 ;
 ; Build and test Lumen.

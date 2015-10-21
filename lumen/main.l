@@ -7,9 +7,9 @@
 (define eval-print (form)
   (let ((ok x) (guard ((get compiler 'eval) form)))
     (if (not ok) (print (cat "error: " x))
-        (is? x) (print (string x)))))
+        (is? x) (do (print (string x)) x))))
 
-(define rep (s)
+(define-global rep (s)
   (eval-print ((get reader 'read-string) s)))
 
 (define repl ()

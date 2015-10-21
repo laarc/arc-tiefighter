@@ -32,5 +32,10 @@ case $host in
 esac
 
 export LUMEN_HOST="${host}"
-exec $(which rlwrap) ${host} "${home}/${code}" "$@"
+
+if [ -z "$*" ]; then
+  exec rlwrap ${host} "${home}/${code}" "$@"
+else
+  exec        ${host} "${home}/${code}" "$@"
+fi
 
