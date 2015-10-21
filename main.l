@@ -100,6 +100,19 @@ Evaluate (Open JS console to see output)
 </div>
 <div>
 <textarea id="repl" rows=80 cols=80>
+
+(def make-adder (n) [+ _ n])
+
+(def add2 (make-adder 2))
+
+(add2 40)
+
+(prn "Hello")
+
+(def textarea (,$ '#repl))
+
+(textarea.val)
+
 </textarea>
 </div>
 
