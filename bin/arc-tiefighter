@@ -60,15 +60,23 @@ if [ ! -z "${REBUILD}" ]; then
 fi
 
 if [ "${REPL}" == "0" ]; then
-  args="-e (run)"
+  args="(run ${PORT:-9999})"
 else
   args=""
   rlwrap="`which rlwrap`"
 fi
 
 if [ ! -z "$rlwrap" ]; then
-  cmdline="$@" exec "${rlwrap}" "${host}" "${bin}/website.${ext}" $args
+  if [ "${REPL}" == "0" ]; then
+    cmdline="$@" exec "${rlwrap}" "${host}" "${bin}/website.${ext}" -e "$args"
+  else
+    cmdline="$@" exec "${rlwrap}" "${host}" "${bin}/website.${ext}"
+  fi
 else
-  cmdline="$@" exec             "${host}" "${bin}/website.${ext}" $args
+  if [ "${REPL}" == "0" ]; then
+    cmdline="$@" exec             "${host}" "${bin}/website.${ext}" -e "$args"
+  else
+    cmdline="$@" exec             "${host}" "${bin}/website.${ext}"
+  fi
 fi
 
