@@ -87,7 +87,6 @@ require("fs");
 
 (def bundle-btm*
 """
-
 ac = function (s) {
   if (function63(s)) {
     // extract multiline string from the comments inside the fn.
@@ -104,16 +103,35 @@ ac = function (s) {
   }
   return null;
 };
-
-ac(ml(function () { /*
 """)
-(cat! bundle-btm* (filechars (j "sudoarc" "sudoarc.l")))
-(cat! bundle-btm* """
-*/ }));
 
-ac("(mac unquote (x) `(do (jseval ',x)))")
+(define reader (require 'reader))
+(define compiler (require 'compiler))
 
-""")
+(define ac-comp1 (e)
+  (eval e)
+  (cat! bundle-btm* (compile (compiler.expand e)))
+  (cat! bundle-btm* "\n"))
+
+(define ac-compile (expr)
+  (if (string? expr)
+    (map ac-comp1 ((get reader 'read-all) (reader.stream expr)))
+    (ac-comp1 expr)))
+
+(ac-compile (filechars (j "sudoarc" "sudoarc.l")))
+(ac-compile "(mac unquote (x) `(do (jseval ',x)))")
+
+; ac(ml(function () { /*
+; """)
+; (cat! bundle-btm* (filechars (j "sudoarc" "sudoarc.l")))
+; (cat! bundle-btm* """
+; */ }));
+
+; (cat! bundle-btm*
+; """
+; ac("(mac unquote (x) `(do (jseval ',x)))")
+; """)
+
 
 
 (def mkpkg (name body)

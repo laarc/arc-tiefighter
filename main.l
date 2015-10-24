@@ -83,12 +83,6 @@
         (respond req (cat """
 <html>
 <head>
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
-<script type="text/javascript">
-"""
-(filechars "browser.js")
-"""
-</script>
 <title>arc.tiefighter</title>
 </head>
 <body>
@@ -115,6 +109,12 @@ Evaluate (Open JS console to see output)
 
 </textarea>
 </div>
+<script type="text/javascript">
+"""
+(filechars "browser.js")
+"""
+</script>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
 
 </body>
 </html>
