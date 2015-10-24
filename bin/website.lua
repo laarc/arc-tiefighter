@@ -1613,7 +1613,13 @@ function run(port)
   return(srv(function (req)
     local data = recv(req)
     prn(data)
-    return(respond(req, "\n<html>\n<head>\n<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js\"></script>\n<script type=\"text/javascript\">\n" .. filechars("browser.js") .. "\n</script>\n<title>arc.tiefighter</title>\n</head>\n<body>\n<center>\n<div>\n<button onclick=\"console.log(ac($('#repl').val()))\">\nEvaluate (Open JS console to see output)\n</button>\n</div>\n<div>\n<textarea id=\"repl\" rows=80 cols=80>\n\n(def make-adder (n) [+ _ n])\n\n(def add2 (make-adder 2))\n\n(add2 40)\n\n(prn \"Hello\")\n\n(def textarea (,$ '#repl))\n\n(textarea.val)\n\n</textarea>\n</div>\n\n</body>\n</html>\n"))
+    local _e2
+    if true then
+      _e2 = filechars("index.html")
+    else
+      _e2 = "\n<html>\n<head>\n<title>arc.tiefighter</title>\n</head>\n<body>\n<center>\n<div>\n<button onclick=\"console.log(ac($('#repl').val()))\">\nEvaluate (Open JS console to see output)\n</button>\n</div>\n<div>\n<textarea id=\"repl\" rows=80 cols=80>\n\n(def make-adder (n) [+ _ n])\n\n(def add2 (make-adder 2))\n\n(add2 40)\n\n(prn \"Hello\")\n\n(def textarea (,$ '#repl))\n\n(textarea.val)\n\n</textarea>\n</div>\n<script type=\"text/javascript\">\n" .. filechars("browser.js") .. "\n</script>\n<script src=\"//ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js\"></script>\n\n</body>\n</html>\n"
+    end
+    return(respond(req, _e2))
   end, {_stash = true, port = port}))
 end
 prn("Type (run) to serve port 9999, or (run 2222) to serve 2222.")

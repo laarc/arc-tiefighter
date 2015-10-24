@@ -80,7 +80,10 @@
     (fn (req)
       (let data (recv req)
         (prn data)
-        (respond req (cat """
+        (respond req
+                 (if true
+                     (filechars "index.html")
+                     (cat """
 <html>
 <head>
 <title>arc.tiefighter</title>
@@ -119,7 +122,7 @@ Evaluate (Open JS console to see output)
 </body>
 </html>
 """))
-        ))))
+        )))))
 
 (prn "Type (run) to serve port 9999, or (run 2222) to serve 2222.")
 
